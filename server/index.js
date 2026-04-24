@@ -390,7 +390,7 @@ setInterval(() => {
 // Catch-all: serve index.html for any non-API route (SPA support)
 const indexPath = path.join(__dirname, '..', 'client', 'dist', 'index.html');
 if (fs.existsSync(indexPath)) {
-  app.get('*', (req, res) => {
+  app.get('{*path}', (req, res) => {
     res.sendFile(indexPath);
   });
 }
