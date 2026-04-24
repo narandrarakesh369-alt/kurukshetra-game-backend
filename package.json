@@ -1,5 +1,9 @@
 {
   "name": "kurukshetra-game",
   "version": "1.0.0",
-  "description": "Kurukshetra Card War Arena"
+  "description": "Kurukshetra Card War Arena",
+  "scripts": {
+    "start": "node server/index.js",
+    "build": "cd server && npm install"
+  }
 }
