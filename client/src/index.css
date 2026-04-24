@@ -1,0 +1,619 @@
+:root {
+  --primary-color: #8B4513; /* SaddleBrown - warm earth tone */
+  --secondary-color: #D2691E; /* Chocolate - rich warm */
+  --accent-gold: #FFD700;
+  --bg-color: #1A0F0A; /* Very dark brown, almost black */
+  --surface-color: #2D1A11; /* Slightly lighter surface for cards */
+  --text-primary: #FFF8DC; /* Cornsilk - soft warm white */
+  --text-secondary: #D4AF37; /* Metallic Gold */
+  --danger: #DC143C;
+  --success: #228B22;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', 'Roboto', sans-serif;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-image: url('/sita_background_1776911507070.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Semi-transparent overlay to ensure text readability against background */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(26, 15, 10, 0.85); /* Dark brown overlay */
+  z-index: -1;
+}
+
+.app-container {
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Typography */
+h1, h2, h3 {
+  color: var(--accent-gold);
+  text-align: center;
+  margin-bottom: 20px;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+/* Buttons */
+.btn {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  border: 1px solid var(--accent-gold);
+  padding: 15px 20px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(255, 215, 0, 0.2);
+  filter: brightness(1.1);
+}
+
+.btn:disabled {
+  background: #555;
+  border-color: #444;
+  color: #888;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 215, 0, 0.1);
+}
+
+/* Inputs */
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.input-field {
+  width: 100%;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--primary-color);
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+}
+
+/* Cards */
+.card {
+  background: rgba(45, 26, 17, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Avatars */
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.avatar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0,0,0,0.3);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.avatar-item.selected {
+  border-color: var(--accent-gold);
+  background: rgba(255, 215, 0, 0.1);
+}
+
+.avatar-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid var(--primary-color);
+  margin-bottom: 8px;
+  object-fit: cover;
+}
+
+.player-name {
+  font-size: 0.8rem;
+  text-align: center;
+  word-break: break-all;
+}
+
+.player-role-badge {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--primary-color);
+  color: white;
+  margin-top: 4px;
+}
+
+/* Chat */
+.chat-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  overflow: hidden;
+  height: 300px;
+}
+
+.chat-messages {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chat-message {
+  background: rgba(45, 26, 17, 0.9);
+  padding: 10px 15px;
+  border-radius: 8px;
+  border-left: 3px solid var(--accent-gold);
+  max-width: 85%;
+  align-self: flex-start;
+}
+
+.chat-message.system {
+  background: transparent;
+  border-left: none;
+  text-align: center;
+  align-self: center;
+  color: var(--text-secondary);
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+.chat-message.own {
+  align-self: flex-end;
+  background: var(--primary-color);
+  border-left: none;
+  border-right: 3px solid var(--accent-gold);
+}
+
+.chat-sender {
+  font-weight: bold;
+  font-size: 0.8rem;
+  color: var(--accent-gold);
+  margin-bottom: 4px;
+}
+
+.chat-input-area {
+  display: flex;
+  padding: 10px;
+  background: rgba(26, 15, 10, 0.9);
+  border-top: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.chat-input {
+  flex-grow: 1;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--primary-color);
+  color: white;
+  padding: 10px;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.chat-send-btn {
+  background: var(--accent-gold);
+  color: var(--bg-color);
+  border: none;
+  border-radius: 4px;
+  padding: 0 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.2); }
+  50% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.6); }
+  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.2); }
+}
+
+.glow-effect {
+  animation: pulse-glow 2s infinite;
+}
+
+/* ===== PER-UNIT ANIMATIONS ===== */
+
+/* --- WARRIOR: March + Sword Slash --- */
+@keyframes warrior-march {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-3px) rotate(-2deg); }
+  75% { transform: translateY(-3px) rotate(2deg); }
+}
+@keyframes warrior-slash {
+  0% { transform: rotate(0deg) scale(1); }
+  20% { transform: rotate(-15deg) scale(1.1); }
+  40% { transform: rotate(20deg) scale(1.15); }
+  60% { transform: rotate(-5deg) scale(1.05); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+.unit-warrior.anim-walk { animation: warrior-march 0.6s infinite ease-in-out; }
+.unit-warrior.anim-attack { animation: warrior-slash 0.4s infinite ease-in-out; }
+
+/* --- ARCHER: Sway + Bow Draw-Release --- */
+@keyframes archer-sway {
+  0%,100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-2px) translateX(1px); }
+}
+@keyframes archer-shoot {
+  0% { transform: scale(1) translateX(0); }
+  30% { transform: scale(0.92) translateX(-3px); }
+  50% { transform: scale(1.12) translateX(4px); }
+  70% { transform: scale(1.05) translateX(2px); }
+  100% { transform: scale(1) translateX(0); }
+}
+.unit-archer.anim-walk { animation: archer-sway 0.7s infinite ease-in-out; }
+.unit-archer.anim-attack { animation: archer-shoot 0.5s infinite ease-in-out; }
+
+/* --- HORSE: Gallop + Charge --- */
+@keyframes horse-gallop {
+  0%,100% { transform: translateY(0) rotate(0deg) scaleY(1); }
+  15% { transform: translateY(-6px) rotate(-3deg) scaleY(0.95); }
+  30% { transform: translateY(-2px) rotate(0deg) scaleY(1.02); }
+  50% { transform: translateY(-8px) rotate(2deg) scaleY(0.93); }
+  70% { transform: translateY(-2px) rotate(0deg) scaleY(1.02); }
+}
+@keyframes horse-charge {
+  0% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(var(--lunge-dir, -8px)) scale(1.15) rotate(-5deg); }
+  60% { transform: translateY(0) scale(1.1) rotate(5deg); }
+  100% { transform: translateY(0) scale(1) rotate(0deg); }
+}
+.unit-horse.anim-walk { animation: horse-gallop 0.35s infinite ease-in-out; }
+.unit-horse.anim-attack { animation: horse-charge 0.35s infinite ease-in-out; }
+
+/* --- ELEPHANT: Heavy Stomp Walk + Smash --- */
+@keyframes elephant-stomp {
+  0%,100% { transform: translateY(0) scale(1); }
+  20% { transform: translateY(-2px) scale(1.02); }
+  40% { transform: translateY(3px) scale(0.97); }
+  60% { transform: translateY(-1px) scale(1.01); }
+  80% { transform: translateY(2px) scale(0.98); }
+}
+@keyframes elephant-smash {
+  0% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.08) rotate(-4deg) translateY(-5px); }
+  50% { transform: scale(1.18) rotate(6deg) translateY(6px); }
+  75% { transform: scale(1.05) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.unit-elephant.anim-walk { animation: elephant-stomp 0.8s infinite ease-in-out; }
+.unit-elephant.anim-attack { animation: elephant-smash 0.6s infinite ease-in-out; }
+
+/* --- MAGE: Float + Cast Spell --- */
+@keyframes mage-float {
+  0%,100% { transform: translateY(0) scale(1); filter: brightness(1); }
+  50% { transform: translateY(-5px) scale(1.03); filter: brightness(1.15); }
+}
+@keyframes mage-cast {
+  0% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+  30% { transform: scale(1.1) rotate(-8deg); filter: brightness(1.4) hue-rotate(20deg); }
+  60% { transform: scale(1.2) rotate(5deg); filter: brightness(1.6) hue-rotate(-10deg); }
+  80% { transform: scale(1.05) rotate(-2deg); filter: brightness(1.2); }
+  100% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+}
+.unit-mage.anim-walk { animation: mage-float 1s infinite ease-in-out; }
+.unit-mage.anim-attack { animation: mage-cast 0.7s infinite ease-in-out; }
+
+/* --- GENERIC FALLBACK --- */
+.anim-walk { animation: warrior-march 0.6s infinite ease-in-out; }
+.anim-attack { animation: warrior-slash 0.4s infinite ease-in-out; }
+
+/* --- VFX OVERLAYS (children inside unit divs) --- */
+
+/* Sword slash arc */
+@keyframes slash-arc {
+  0% { opacity: 0; transform: rotate(-60deg) scale(0.3); }
+  30% { opacity: 0.9; transform: rotate(30deg) scale(1); }
+  100% { opacity: 0; transform: rotate(80deg) scale(0.5); }
+}
+.slash-effect {
+  position: absolute;
+  width: 130%; height: 130%;
+  top: -15%; left: -15%;
+  border: 2px solid rgba(255,220,100,0.8);
+  border-radius: 50%;
+  border-left-color: transparent;
+  border-bottom-color: transparent;
+  pointer-events: none;
+  animation: slash-arc 0.4s infinite ease-out;
+}
+
+/* Arrow projectile trail */
+@keyframes arrow-fly {
+  0% { opacity: 0.9; width: 0; }
+  50% { opacity: 0.7; width: 25px; }
+  100% { opacity: 0; width: 0; }
+}
+.arrow-trail {
+  position: absolute;
+  top: 45%; right: -30px;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255,200,50,0.8), transparent);
+  pointer-events: none;
+  animation: arrow-fly 0.5s infinite linear;
+  border-radius: 1px;
+}
+
+/* Horse dust cloud */
+@keyframes dust-kick {
+  0% { opacity: 0.6; transform: scale(0.3) translateY(0); }
+  100% { opacity: 0; transform: scale(1.5) translateY(10px); }
+}
+.dust-trail {
+  position: absolute; bottom: -8px; left: 25%;
+  width: 12px; height: 8px;
+  background: radial-gradient(ellipse, rgba(180,150,100,0.5), transparent);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: dust-kick 0.35s infinite linear;
+}
+.dust-trail:nth-child(2) {
+  left: 55%; animation-delay: 0.15s;
+}
+
+/* Elephant ground crack */
+@keyframes ground-crack {
+  0% { opacity: 0; transform: scale(0.5); }
+  40% { opacity: 0.6; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(1.8); }
+}
+.stomp-crack {
+  position: absolute; bottom: -12px; left: 10%;
+  width: 80%; height: 10px;
+  background: radial-gradient(ellipse, rgba(255,100,0,0.4), transparent);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: ground-crack 0.6s infinite ease-out;
+}
+
+/* Mage magic orbs */
+@keyframes magic-orb {
+  0% { opacity: 0; transform: rotate(0deg) translateX(20px) scale(0.3); }
+  50% { opacity: 0.8; transform: rotate(180deg) translateX(25px) scale(1); }
+  100% { opacity: 0; transform: rotate(360deg) translateX(20px) scale(0.3); }
+}
+.magic-orb {
+  position: absolute;
+  width: 6px; height: 6px;
+  background: radial-gradient(circle, #00ccff, #0066ff);
+  border-radius: 50%;
+  top: 40%; left: 40%;
+  pointer-events: none;
+  animation: magic-orb 0.8s infinite linear;
+  box-shadow: 0 0 6px #00ccff;
+}
+.magic-orb:nth-child(2) { animation-delay: 0.27s; }
+.magic-orb:nth-child(3) { animation-delay: 0.54s; }
+
+.damage-flash {
+  filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5);
+  transition: filter 0.1s;
+}
+
+/* ===== VFX SYSTEM ===== */
+
+/* Floating dust particles */
+@keyframes dust-float {
+  0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  50% { opacity: 0.3; }
+  100% { transform: translate(var(--dx, 80px), var(--dy, -40px)) scale(0.3); opacity: 0; }
+}
+.dust-particle {
+  position: absolute;
+  width: 4px; height: 4px;
+  background: radial-gradient(circle, rgba(210,180,140,0.8), transparent);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: dust-float var(--dur, 4s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+/* Wind streaks */
+@keyframes wind-streak {
+  0% { transform: translateX(-100%) scaleX(0.5); opacity: 0; }
+  20% { opacity: 0.15; }
+  80% { opacity: 0.1; }
+  100% { transform: translateX(600px) scaleX(1); opacity: 0; }
+}
+.wind-streak {
+  position: absolute;
+  height: 1px;
+  width: 120px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  pointer-events: none;
+  animation: wind-streak var(--dur, 3s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+/* Combat spark burst */
+@keyframes spark-burst {
+  0% { transform: scale(0); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.8; }
+  100% { transform: scale(0); opacity: 0; }
+}
+.combat-spark {
+  position: absolute;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff, #ffaa00, transparent);
+  pointer-events: none;
+  animation: spark-burst 0.3s ease-out forwards;
+  z-index: 100;
+}
+
+/* Death explosion */
+@keyframes death-explode {
+  0% { transform: translate(-50%,-50%) scale(0.2); opacity: 1; }
+  40% { transform: translate(-50%,-50%) scale(2); opacity: 0.8; }
+  100% { transform: translate(-50%,-50%) scale(3); opacity: 0; }
+}
+.death-explosion {
+  position: absolute;
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, #ff6600 30%, #ff0000 60%, transparent 80%);
+  pointer-events: none;
+  animation: death-explode 0.5s ease-out forwards;
+  z-index: 90;
+}
+
+/* Screen flash overlay */
+@keyframes screen-flash {
+  0% { opacity: 0.6; }
+  100% { opacity: 0; }
+}
+.screen-flash {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 500;
+  animation: screen-flash 0.4s ease-out forwards;
+}
+
+/* Stomp shockwave ring */
+@keyframes shockwave-ring {
+  0% { transform: translate(-50%,-50%) scale(0); opacity: 0.8; border-width: 6px; }
+  100% { transform: translate(-50%,-50%) scale(8); opacity: 0; border-width: 1px; }
+}
+.shockwave {
+  position: absolute;
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  border: 4px solid rgba(255,150,0,0.8);
+  pointer-events: none;
+  animation: shockwave-ring 0.8s ease-out forwards;
+  z-index: 80;
+}
+
+/* Freeze shimmer */
+@keyframes frost-shimmer {
+  0% { box-shadow: 0 0 8px rgba(0,200,255,0.6), inset 0 0 8px rgba(0,200,255,0.3); }
+  50% { box-shadow: 0 0 20px rgba(0,200,255,0.9), inset 0 0 15px rgba(0,200,255,0.5); }
+  100% { box-shadow: 0 0 8px rgba(0,200,255,0.6), inset 0 0 8px rgba(0,200,255,0.3); }
+}
+.frozen-unit {
+  animation: frost-shimmer 1.5s infinite ease-in-out !important;
+  filter: sepia(1) hue-rotate(180deg) saturate(3) brightness(0.8) !important;
+}
+
+/* Shake */
+@keyframes battlefield-shake {
+  0%,100% { transform: translate(0,0); }
+  10% { transform: translate(-4px,-3px); }
+  20% { transform: translate(5px,2px); }
+  30% { transform: translate(-3px,4px); }
+  40% { transform: translate(4px,-2px); }
+  50% { transform: translate(-2px,3px); }
+  60% { transform: translate(3px,-4px); }
+  70% { transform: translate(-5px,2px); }
+  80% { transform: translate(2px,-3px); }
+  90% { transform: translate(-3px,4px); }
+}
+.shake-animation {
+  animation: battlefield-shake 0.6s ease-in-out;
+}
+
+/* Spawn glow pulse */
+@keyframes spawn-glow {
+  0% { box-shadow: 0 0 0 0 rgba(0,200,255,0.6); }
+  50% { box-shadow: 0 0 25px 10px rgba(0,200,255,0.4); }
+  100% { box-shadow: 0 0 0 0 rgba(0,200,255,0); }
+}
+.spawn-pulse {
+  animation: spawn-glow 0.6s ease-out;
+}
+
+/* Energy bar glow pulse for double elixir */
+@keyframes energy-pulse {
+  0%,100% { box-shadow: 0 0 4px rgba(255,0,255,0.3); }
+  50% { box-shadow: 0 0 12px rgba(255,0,255,0.8); }
+}
+.energy-surge {
+  animation: energy-pulse 1s infinite;
+}
+
+/* Card hover lift */
+.card-in-hand {
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+.card-in-hand:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(255,215,0,0.4) !important;
+}
