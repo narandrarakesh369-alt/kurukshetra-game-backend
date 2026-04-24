@@ -3,12 +3,19 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(cors());
 
-// Serve the frontend build
-app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
+// Serve the frontend build if it exists
+const distPath = path.join(__dirname, '..', 'client', 'dist');
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  console.log('Serving frontend from:', distPath);
+} else {
+  console.log('No dist folder found at:', distPath);
+}
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*", methods: ["GET", "POST"] } });
@@ -381,9 +388,12 @@ setInterval(() => {
 }, 100);
 
 // Catch-all: serve index.html for any non-API route (SPA support)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'client', 'dist', 'index.html'));
-});
+const indexPath = path.join(__dirname, '..', 'client', 'dist', 'index.html');
+if (fs.existsSync(indexPath)) {
+  app.get('*', (req, res) => {
+    res.sendFile(indexPath);
+  });
+}
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
