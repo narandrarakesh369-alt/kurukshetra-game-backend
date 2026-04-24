@@ -21,13 +21,13 @@ jobs:
     - name: Install dependencies and build Web App
       working-directory: ./client
       run: |
-        npm install
+        npm install --no-package-lock
         npm run build
 
     - name: Sync Capacitor Android
       working-directory: ./client
       run: |
-        npm install @capacitor/core @capacitor/cli @capacitor/android
+        npm install @capacitor/core @capacitor/cli @capacitor/android --no-package-lock
         npx cap sync android
 
     - name: Setup Java JDK
