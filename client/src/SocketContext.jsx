@@ -12,9 +12,22 @@ export const SocketProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // In production (same-origin), connect to current host. In dev, use localhost:3001
+    // Detect environment and set server URL
+    const isCapacitor = window.location.protocol === 'capacitor:' || window.location.protocol === 'https:' && window.location.hostname === 'localhost' && !window.location.port;
     const isDev = window.location.hostname === 'localhost' && window.location.port === '5173';
-    const SERVER_URL = import.meta.env.VITE_SERVER_URL || (isDev ? 'http://localhost:3001' : window.location.origin);
+    
+    let SERVER_URL;
+    if (import.meta.env.VITE_SERVER_URL) {
+      SERVER_URL = import.meta.env.VITE_SERVER_URL;
+    } else if (isCapacitor) {
+      SERVER_URL = 'https://kurukshetra-game-backend.onrender.com';
+    } else if (isDev) {
+      SERVER_URL = 'http://localhost:3001';
+    } else {
+      SERVER_URL = window.location.origin;
+    }
+    
+    console.log('Connecting to server:', SERVER_URL);
     const newSocket = io(SERVER_URL);
 
     newSocket.on('connect', () => {
