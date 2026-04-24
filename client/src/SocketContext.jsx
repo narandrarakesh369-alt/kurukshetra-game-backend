@@ -12,8 +12,9 @@ export const SocketProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // Use env variable for production, fallback to localhost for dev
-    const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
+    // In production (same-origin), connect to current host. In dev, use localhost:3001
+    const isDev = window.location.hostname === 'localhost' && window.location.port === '5173';
+    const SERVER_URL = import.meta.env.VITE_SERVER_URL || (isDev ? 'http://localhost:3001' : window.location.origin);
     const newSocket = io(SERVER_URL);
 
     newSocket.on('connect', () => {

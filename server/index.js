@@ -2,9 +2,14 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 app.use(cors());
+
+// Serve the frontend build
+app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
+
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*", methods: ["GET", "POST"] } });
 
@@ -374,6 +379,11 @@ setInterval(() => {
     });
   }
 }, 100);
+
+// Catch-all: serve index.html for any non-API route (SPA support)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'client', 'dist', 'index.html'));
+});
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
