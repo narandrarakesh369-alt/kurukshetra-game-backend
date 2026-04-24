@@ -224,11 +224,13 @@ const Game = ({ initialGameData }) => {
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onClick={handleBattlefieldTap}
+        onTouchEnd={(e) => { e.preventDefault(); const touch = e.changedTouches[0]; const rect = e.currentTarget.getBoundingClientRect(); if (selectedCard) { const xPercent = ((touch.clientX - rect.left) / rect.width) * BOARD_WIDTH; deployCard(selectedCard.cardId, selectedCard.handIndex, xPercent); } }}
         style={{ 
           flexGrow: 1, position: 'relative', overflow: 'hidden', 
           backgroundImage: `url(${RANDOM_BG})`, 
           backgroundSize: 'cover', 
           backgroundPosition: 'center',
+          touchAction: 'none',
         }}
       >
         {/* Atmospheric vignette + fog overlay */}
