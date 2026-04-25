@@ -149,24 +149,40 @@ const Game = ({ initialGameData }) => {
   const opponentId = Object.keys(gameState.players).find(id => id !== socket.id);
   const opponent = gameState.players[opponentId];
 
-  const [selectedCard, setSelectedCard] = useState(null); // { cardId, handIndex } for tap-to-deploy on mobile
+  const [selectedCard, setSelectedCard] = useState(null);
+  const deployCountRef = useRef(0);
+
+  // Row-based formation positions
+  const ROW_SLOTS = [80, 170, 250, 330, 420]; // 5 slots per row
 
   const handleDragStart = (e, cardId, index) => {
     e.dataTransfer.setData('cardId', cardId);
     e.dataTransfer.setData('handIndex', index);
   };
 
-  const deployCard = (cardId, handIndex, xPercent) => {
+  // Auto-deploy in formation: fills row left-to-right, then next row behind
+  const deployCard = (cardId, handIndex, xOverride) => {
     if (!cardId || me.mana < CARDS[cardId].cost) return;
+    
+    let x;
+    if (xOverride !== undefined && xOverride !== null) {
+      x = xOverride; // Manual placement from drag
+    } else {
+      // Auto-place in row formation
+      const slotIndex = deployCountRef.current % ROW_SLOTS.length;
+      x = ROW_SLOTS[slotIndex];
+      deployCountRef.current++;
+    }
+
     socket.emit('spawnUnit', { 
-      gameId: gameState.id, cardId, x: xPercent,
+      gameId: gameState.id, cardId, x,
       hpBonus: getUnitStats(cardId).hpBonus,
       dmgBonus: getUnitStats(cardId).dmgBonus
     });
     // Unit-specific deploy sounds
     if (cardId === 'horse') playHorseSound();
     else playDeploy();
-    addVfx('spark', (xPercent / BOARD_WIDTH) * 100, 85, 400);
+    addVfx('spark', (x / BOARD_WIDTH) * 100, 85, 400);
     const newHand = [...hand];
     const availableCards = DECK.filter(c => c !== cardId);
     newHand[handIndex] = availableCards[Math.floor(Math.random() * availableCards.length)];
@@ -474,21 +490,17 @@ const Game = ({ initialGameData }) => {
                 key={`${card.id}-${index}`}
                 draggable={canAfford}
                 onDragStart={(e) => handleDragStart(e, card.id, index)}
-                onClick={() => { if (canAfford) { playCardSelect(); setSelectedCard(isSelected ? null : { cardId: card.id, handIndex: index }); } }}
+                onClick={() => { if (canAfford) { playCardSelect(); deployCard(card.id, index); } }}
+                onTouchEnd={(e) => { e.preventDefault(); if (canAfford) { playCardSelect(); deployCard(card.id, index); } }}
                 style={{
                   width: '90px', height: '105px',
-                  background: isSelected 
-                    ? 'linear-gradient(180deg, rgba(255,215,0,0.15), rgba(40,25,10,0.95))' 
-                    : 'linear-gradient(180deg, rgba(20,15,10,0.9), rgba(10,8,5,0.95))',
-                  border: isSelected ? '2px solid #FFD700' : (canAfford ? '1px solid rgba(255,215,0,0.25)' : '1px solid #222'),
+                  background: 'linear-gradient(180deg, rgba(20,15,10,0.9), rgba(10,8,5,0.95))',
+                  border: canAfford ? '1px solid rgba(255,215,0,0.25)' : '1px solid #222',
                   borderRadius: '12px',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end',
                   cursor: canAfford ? 'pointer' : 'not-allowed',
                   opacity: canAfford ? 1 : 0.3,
-                  boxShadow: isSelected 
-                    ? '0 0 25px rgba(255,215,0,0.5), 0 -6px 20px rgba(255,215,0,0.2), inset 0 0 15px rgba(255,215,0,0.05)' 
-                    : (canAfford ? '0 4px 12px rgba(0,0,0,0.5)' : 'none'),
-                  transform: isSelected ? 'translateY(-12px) scale(1.06)' : 'none',
+                  boxShadow: canAfford ? '0 4px 12px rgba(0,0,0,0.5)' : 'none',
                   transition: 'all 0.2s ease',
                   position: 'relative',
                   overflow: 'hidden'
@@ -504,19 +516,15 @@ const Game = ({ initialGameData }) => {
                     borderRadius: '50%',
                     marginBottom: '4px',
                     filter: canAfford ? 'none' : 'grayscale(0.8)',
-                    border: isSelected ? '2px solid rgba(255,215,0,0.5)' : '1px solid rgba(255,255,255,0.1)',
-                    boxShadow: isSelected 
-                      ? '0 0 15px rgba(255,215,0,0.4)' 
-                      : '0 4px 8px rgba(0,0,0,0.6)'
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.6)'
                   }}
                 />
 
                 {/* Pedestal glow (ground shadow under character) */}
                 <div style={{
                   width: '60%', height: '4px',
-                  background: isSelected 
-                    ? 'radial-gradient(ellipse, rgba(255,215,0,0.5), transparent)' 
-                    : 'radial-gradient(ellipse, rgba(0,200,255,0.2), transparent)',
+                  background: 'radial-gradient(ellipse, rgba(0,200,255,0.2), transparent)',
                   borderRadius: '50%',
                   marginBottom: '2px'
                 }} />
@@ -528,7 +536,7 @@ const Game = ({ initialGameData }) => {
                   borderRadius: '0 0 10px 10px',
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                 }}>
-                  <span style={{ fontSize: '0.6rem', fontWeight: 'bold', color: isSelected ? '#FFD700' : '#ccc' }}>{card.name}</span>
+                  <span style={{ fontSize: '0.6rem', fontWeight: 'bold', color: '#ccc' }}>{card.name}</span>
                   <span style={{
                     background: canAfford ? 'linear-gradient(135deg, #cc00cc, #8800aa)' : '#333',
                     color: 'white', borderRadius: '4px',
@@ -536,23 +544,12 @@ const Game = ({ initialGameData }) => {
                     boxShadow: canAfford ? '0 0 6px rgba(200,0,200,0.4)' : 'none'
                   }}>{card.cost}</span>
                 </div>
-
-                {/* Selected indicator arrow */}
-                {isSelected && (
-                  <div style={{
-                    position: 'absolute', top: '-8px', left: '50%', transform: 'translateX(-50%)',
-                    width: 0, height: 0,
-                    borderLeft: '6px solid transparent', borderRight: '6px solid transparent',
-                    borderTop: '6px solid #FFD700',
-                    filter: 'drop-shadow(0 0 4px rgba(255,215,0,0.6))'
-                  }} />
-                )}
               </div>
             );
           })}
         </div>
         <div style={{ textAlign: 'center', fontSize: '0.6rem', color: '#555', marginTop: '3px' }}>
-          {selectedCard ? '👆 Tap battlefield to deploy' : 'Select a warrior, then tap arena'}
+          👆 Tap a card to deploy in formation
         </div>
       </div>
     </div>

@@ -10,7 +10,7 @@ import { loadPlayer, createPlayer, isLoggedIn, recordMatchResult } from './utils
 import { playVictory, playDefeat } from './utils/soundEngine';
 
 const Home = () => {
-  const { socket, isConnected } = useSocket();
+  const { socket, isConnected, reconnect } = useSocket();
   const [screen, setScreen] = useState('loading'); // loading, login, home, collection, playing, result
   const [gameData, setGameData] = useState(null);
   const [matchResult, setMatchResult] = useState(null);
@@ -29,6 +29,50 @@ const Home = () => {
   const refreshPlayer = useCallback(() => {
     setPlayer(loadPlayer());
   }, []);
+
+  // When app resumes and socket reconnects, go back to home if stuck
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // If we were in a game but the socket died, go back to home
+        if (screen === 'playing' && !isConnected) {
+          console.log('Game connection lost, returning to home');
+          setGameData(null);
+          setScreen('home');
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [screen, isConnected]);
+
+  // Android back button handling
+  useEffect(() => {
+    const handleBackButton = (e) => {
+      if (screen === 'playing') {
+        e.preventDefault();
+        // Leave the game and go home
+        setGameData(null);
+        setScreen('home');
+      } else if (screen === 'collection' || screen === 'result') {
+        e.preventDefault();
+        refreshPlayer();
+        setMatchResult(null);
+        setScreen('home');
+      }
+      // On home screen, let the default back behavior happen (minimize app)
+    };
+
+    // Handle browser back button / Android back
+    window.addEventListener('popstate', handleBackButton);
+    
+    // Push a state so we can intercept back
+    if (screen === 'playing' || screen === 'collection' || screen === 'result') {
+      window.history.pushState({ screen }, '');
+    }
+
+    return () => window.removeEventListener('popstate', handleBackButton);
+  }, [screen, refreshPlayer]);
 
   // Socket events
   useEffect(() => {
@@ -71,6 +115,16 @@ const Home = () => {
   const handleBattle = (mode) => {
     if (socket && isConnected) {
       socket.emit('joinQueue', { playerName: player.name, mode });
+    } else {
+      // Socket not connected, try to reconnect
+      console.log('Socket not connected, reconnecting...');
+      reconnect();
+      // Try again after a short delay
+      setTimeout(() => {
+        if (socket && socket.connected) {
+          socket.emit('joinQueue', { playerName: player.name, mode });
+        }
+      }, 2000);
     }
   };
 
