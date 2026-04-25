@@ -162,7 +162,7 @@ const spawnBotUnit = (game, botPlayer, cardId, x) => {
 };
 
 const checkPowerTrigger = (game, player, now) => {
-  if (player.kills >= 3 && player.powerUses < 2 && now >= player.powerCooldownTime && !game.powerSelectionState) {
+  if (player.kills >= 3 && player.powerUses < 2 && !game.powerSelectionState) {
     game.powerSelectionState = { playerId: player.id, expiresAt: now + 10000 };
     game.timeScale = 0.1;
     io.to(game.id).emit('triggerPowerSelection', { playerId: player.id, expiresAt: now + 10000 });
@@ -177,12 +177,10 @@ const activatePower = (game, player, powerType) => {
   
   const now = Date.now();
   if (powerType === 'mage') {
-    player.powerCooldownTime = now + 20000;
     for (const ent of game.entities) {
       if (ent.side !== player.side) ent.frozenUntil = now + 10000;
     }
   } else if (powerType === 'elephant') {
-    player.powerCooldownTime = now + 30000;
     for (const ent of game.entities) {
       if (ent.side !== player.side) ent.hp = 0;
     }

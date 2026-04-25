@@ -394,20 +394,31 @@ h1, h2, h3 {
   animation: slash-arc 0.4s infinite ease-out;
 }
 
-/* Arrow projectile trail */
-@keyframes arrow-fly {
-  0% { opacity: 0.9; width: 0; }
-  50% { opacity: 0.7; width: 25px; }
-  100% { opacity: 0; width: 0; }
+/* Arrow projectile trail - flies toward enemy (upward) */
+@keyframes arrow-fly-up {
+  0% { opacity: 1; transform: translateY(0) scaleY(1); }
+  50% { opacity: 0.7; transform: translateY(-35px) scaleY(1.5); }
+  100% { opacity: 0; transform: translateY(-70px) scaleY(0.5); }
+}
+@keyframes arrow-fly-down {
+  0% { opacity: 1; transform: translateY(0) scaleY(1); }
+  50% { opacity: 0.7; transform: translateY(35px) scaleY(1.5); }
+  100% { opacity: 0; transform: translateY(70px) scaleY(0.5); }
 }
 .arrow-trail {
   position: absolute;
-  top: 45%; right: -30px;
-  height: 2px;
-  background: linear-gradient(90deg, rgba(255,200,50,0.8), transparent);
+  left: 45%; top: -8px;
+  width: 3px; height: 14px;
+  background: linear-gradient(180deg, rgba(255,220,50,0.9), rgba(255,150,0,0.3), transparent);
   pointer-events: none;
-  animation: arrow-fly 0.5s infinite linear;
-  border-radius: 1px;
+  animation: arrow-fly-up 0.45s infinite linear;
+  border-radius: 2px;
+  box-shadow: 0 0 6px rgba(255,200,50,0.6);
+}
+.arrow-trail-down {
+  animation: arrow-fly-down 0.45s infinite linear;
+  top: auto; bottom: -8px;
+  background: linear-gradient(0deg, rgba(255,220,50,0.9), rgba(255,150,0,0.3), transparent);
 }
 
 /* Horse dust cloud */

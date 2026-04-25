@@ -307,6 +307,7 @@ const Game = ({ initialGameData }) => {
             <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
               {/* Mage Card */}
               <div onClick={() => socket.emit('selectPower', { gameId: gameState.id, powerType: 'mage' })} 
+                onTouchEnd={(e) => { e.preventDefault(); socket.emit('selectPower', { gameId: gameState.id, powerType: 'mage' }); }}
                 style={{ width: '145px', height: '210px', borderRadius: '14px', cursor: 'pointer', overflow: 'hidden', border: '2px solid rgba(0,200,255,0.6)', boxShadow: '0 0 30px rgba(0,150,255,0.4)', transition: 'transform 0.2s, box-shadow 0.2s', position: 'relative' }}
                 onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08)'; e.currentTarget.style.boxShadow = '0 0 50px rgba(0,150,255,0.7)'; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(0,150,255,0.4)'; }}
@@ -319,6 +320,7 @@ const Game = ({ initialGameData }) => {
               </div>
               {/* Elephant Card */}
               <div onClick={() => socket.emit('selectPower', { gameId: gameState.id, powerType: 'elephant' })} 
+                onTouchEnd={(e) => { e.preventDefault(); socket.emit('selectPower', { gameId: gameState.id, powerType: 'elephant' }); }}
                 style={{ width: '145px', height: '210px', borderRadius: '14px', cursor: 'pointer', overflow: 'hidden', border: '2px solid rgba(255,150,0,0.6)', boxShadow: '0 0 30px rgba(255,100,0,0.4)', transition: 'transform 0.2s, box-shadow 0.2s', position: 'relative' }}
                 onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08)'; e.currentTarget.style.boxShadow = '0 0 50px rgba(255,100,0,0.7)'; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(255,100,0,0.4)'; }}
@@ -416,8 +418,8 @@ const Game = ({ initialGameData }) => {
               {/* Archer: arrow trail shooting out */}
               {isAttacking && ent.cardId === 'archer' && (
                 <>
-                  <div className="arrow-trail" />
-                  <div className="arrow-trail" style={{ top: '35%', animationDelay: '0.2s' }} />
+                  <div className={`arrow-trail ${ent.side === me.side ? '' : 'arrow-trail-down'}`} />
+                  <div className={`arrow-trail ${ent.side === me.side ? '' : 'arrow-trail-down'}`} style={{ left: '55%', animationDelay: '0.2s' }} />
                 </>
               )}
               {/* Horse: dust kicked up behind */}
@@ -458,15 +460,18 @@ const Game = ({ initialGameData }) => {
             <span style={{ fontSize: '0.75rem', color: '#00ccff' }}>{Math.floor(me?.baseHp || 0)}</span>
           </div>
 
-          <div style={{ color: '#FFD700', fontWeight: 'bold', fontSize: '0.8rem' }}>⚔️ {me?.kills || 0}/3</div>
-
-          {me && (Math.max(0, Math.ceil((me.powerCooldownTime - localNow) / 1000)) > 0) ? (
-            <div style={{ color: '#666', fontWeight: 'bold', fontSize: '0.75rem' }}>🔒 {Math.max(0, Math.ceil((me.powerCooldownTime - localNow) / 1000))}s</div>
-          ) : (
-            <div style={{ color: me?.powerUses >= 2 ? '#666' : '#00ff88', fontWeight: 'bold', fontSize: '0.75rem' }}>
-              {me?.powerUses >= 2 ? '⚡ Used' : '⚡ Ready'} ({me?.powerUses || 0}/2)
+          {/* Kill progress toward power */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ color: '#FFD700', fontWeight: 'bold', fontSize: '0.75rem' }}>⚔️</span>
+            <div style={{ width: '50px', height: '6px', background: '#333', borderRadius: '3px', overflow: 'hidden' }}>
+              <div style={{ width: `${(Math.min(me?.kills || 0, 3) / 3) * 100}%`, height: '100%', background: (me?.kills || 0) >= 3 ? 'linear-gradient(90deg, #FFD700, #ff8800)' : 'linear-gradient(90deg, #FFD700, #cc9900)', transition: 'width 0.3s', borderRadius: '3px' }}></div>
             </div>
-          )}
+            <span style={{ color: (me?.kills || 0) >= 3 ? '#FFD700' : '#999', fontSize: '0.7rem', fontWeight: 'bold' }}>{Math.min(me?.kills || 0, 3)}/3</span>
+          </div>
+
+          <div style={{ color: me?.powerUses >= 2 ? '#666' : '#00ff88', fontWeight: 'bold', fontSize: '0.7rem' }}>
+            ⚡ {me?.powerUses >= 2 ? 'Powers Used' : `${2 - (me?.powerUses || 0)} Powers Left`}
+          </div>
         </div>
 
         {/* Energy Bar */}
