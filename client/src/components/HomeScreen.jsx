@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { loadPlayer, checkDailyReward, claimDailyReward, DAILY_REWARDS } from '../utils/playerData';
+import { useSocket } from '../SocketContext';
 
 const HomeScreen = ({ onBattle, onCollection, player }) => {
+  const { isConnected } = useSocket();
   const [dailyReward, setDailyReward] = useState(null);
   const [showDailyPopup, setShowDailyPopup] = useState(false);
   const [claimedReward, setClaimedReward] = useState(null);
+
+  const [battleLoading, setBattleLoading] = useState(false);
 
   useEffect(() => {
     const reward = checkDailyReward();
@@ -15,6 +19,22 @@ const HomeScreen = ({ onBattle, onCollection, player }) => {
       }, 800);
     }
   }, []);
+
+  // Auto-start battle when connection comes through while waiting
+  useEffect(() => {
+    if (battleLoading && isConnected) {
+      setBattleLoading(false);
+      onBattle('ai');
+    }
+  }, [isConnected, battleLoading, onBattle]);
+
+  const handleBattleClick = (mode) => {
+    if (isConnected) {
+      onBattle(mode);
+    } else {
+      setBattleLoading(true);
+    }
+  };
 
   const handleClaim = () => {
     const reward = claimDailyReward();
@@ -31,11 +51,14 @@ const HomeScreen = ({ onBattle, onCollection, player }) => {
 
       {/* Top Currency Bar */}
       <div style={{ width: '100%', padding: '10px 16px', background: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,215,0,0.1)' }}>
-        <div style={{ display: 'flex', gap: '16px' }}>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: isConnected ? '#00ff88' : '#ffaa00', boxShadow: isConnected ? '0 0 8px #00ff88' : '0 0 8px #ffaa00', animation: isConnected ? 'none' : 'pulse 1.5s infinite' }} />
           <div style={{ color: '#FFD700', fontWeight: 'bold', fontSize: '0.9rem' }}>🪙 {player.coins}</div>
           <div style={{ color: '#00ccff', fontWeight: 'bold', fontSize: '0.9rem' }}>⭐ Lv.{player.level}</div>
         </div>
-        <div style={{ color: '#888', fontSize: '0.75rem' }}>{player.xp} XP</div>
+        <div style={{ color: isConnected ? '#00ff88' : '#ffaa00', fontSize: '0.7rem', fontWeight: 'bold' }}>
+          {isConnected ? 'Online' : 'Connecting...'}
+        </div>
       </div>
 
       {/* Title */}
@@ -85,16 +108,19 @@ const HomeScreen = ({ onBattle, onCollection, player }) => {
       </div>
 
       {/* BATTLE Button */}
-      <button onClick={() => onBattle('ai')} style={{
+      <button onClick={() => handleBattleClick('ai')} style={{
         width: '90%', maxWidth: '380px', marginTop: '20px', padding: '18px',
-        background: 'linear-gradient(135deg, #cc3300, #ff6600)',
-        border: '2px solid #FFD700', borderRadius: '14px',
+        background: battleLoading
+          ? 'linear-gradient(135deg, #665500, #997700)'
+          : (isConnected ? 'linear-gradient(135deg, #cc3300, #ff6600)' : 'linear-gradient(135deg, #664400, #885500)'),
+        border: `2px solid ${isConnected ? '#FFD700' : '#997700'}`, borderRadius: '14px',
         color: 'white', fontSize: '1.4rem', fontWeight: '900',
         letterSpacing: '4px', cursor: 'pointer',
-        boxShadow: '0 0 30px rgba(255,100,0,0.3), 0 6px 20px rgba(0,0,0,0.4)',
-        textTransform: 'uppercase', transition: 'all 0.2s'
+        boxShadow: isConnected ? '0 0 30px rgba(255,100,0,0.3), 0 6px 20px rgba(0,0,0,0.4)' : '0 4px 12px rgba(0,0,0,0.4)',
+        textTransform: 'uppercase', transition: 'all 0.3s',
+        opacity: battleLoading ? 0.8 : 1
       }}>
-        ⚔️ BATTLE ⚔️
+        {battleLoading ? '⏳ Waking Server...' : (isConnected ? '⚔️ BATTLE ⚔️' : '⚔️ BATTLE ⚔️')}
       </button>
 
       {/* Secondary Buttons */}
@@ -106,7 +132,7 @@ const HomeScreen = ({ onBattle, onCollection, player }) => {
         }}>
           ⬆️ Upgrades
         </button>
-        <button onClick={() => onBattle('multiplayer')} style={{
+        <button onClick={() => handleBattleClick('multiplayer')} style={{
           flex: 1, padding: '12px', background: 'rgba(0,200,255,0.1)',
           border: '1px solid rgba(0,200,255,0.3)', borderRadius: '10px',
           color: '#00ccff', fontSize: '0.85rem', fontWeight: 'bold', cursor: 'pointer'
